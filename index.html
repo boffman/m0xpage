@@ -112,23 +112,33 @@
     const numHorizontalLines = canvas.height / 50;
 
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
 
-    // Draw vertical lines (scrolling effect)
+    // Draw vertical lines with a gradient from dark to light
     for (let i = 0; i <= numVerticalLines; i++) {
       const x = (i - numVerticalLines / 2) * 150 + gridOffset;
       const xStart = canvas.width / 2 + x / 8;
       const xEnd = canvas.width / 2 + x;
 
+      // Create a gradient for each vertical line from horizon (dark) to bottom (light)
+      const gradient = ctx.createLinearGradient(0, horizon, 0, horizon + gridHeight);
+      //gradient.addColorStop(0, "rgba(50, 50, 50, 0.3)"); // Darker at the top
+      gradient.addColorStop(0, "rgba(255, 255, 255, 0.1)"); // Brighter at the bottom
+      gradient.addColorStop(1, "rgba(255, 255, 255, 1.0)"); // Brighter at the bottom
+
+      ctx.strokeStyle = gradient;
       ctx.beginPath();
       ctx.moveTo(xStart, horizon);
       ctx.lineTo(xEnd, horizon + gridHeight);
       ctx.stroke();
     }
 
-    // Draw horizontal lines with perspective effect
+    // Draw horizontal lines with opacity based on distance from horizon
     for (let j = 1; j <= numHorizontalLines; j++) {
       const y = horizon + Math.pow(j / numHorizontalLines, 3) * gridHeight;
+
+      // Calculate opacity based on distance from horizon
+      const opacity = (j / numHorizontalLines) * 0.5;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
 
       ctx.beginPath();
       ctx.moveTo(0, y);
