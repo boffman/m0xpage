@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>m0x</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+  }
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .caption {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    font-family: 'Press Start 2P', sans-serif;
+    color: white;
+    pointer-events: none;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+<div class="caption">m0x</div>
+
+<script>
+  const canvas = document.getElementById('starCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const starLayers = [
+    { speed: 5.0, color: '#ffffff', size: 3 },
+    { speed: 3.0, color: '#cccccc', size: 2 },
+    { speed: 1.0, color: '#888888', size: 2 }
+  ];
+
+  const stars = [];
+  const numStars = 200;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function createStars() {
+    for (let i = 0; i < numStars; i++) {
+      const layer = starLayers[Math.floor(Math.random() * starLayers.length)];
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        speed: layer.speed,
+        color: layer.color,
+        size: layer.size
+      });
+    }
+  }
+  createStars();
+
+  function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    stars.forEach(star => {
+      star.x -= star.speed;
+
+      if (star.x < -star.size) {
+        star.x = canvas.width + star.size;
+        star.y = Math.random() * canvas.height;
+      }
+
+      ctx.fillStyle = star.color;
+      ctx.fillRect(star.x, star.y, star.size, star.size);
+    });
+
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
+</script>
+
+</body>
+</html>
+
