@@ -22,10 +22,9 @@
   }
   .caption {
     position: absolute;
-    top: 20px;
     width: 100%;
     text-align: center;
-    font-size: 6rem; /* Increase font size */
+    font-size: 6rem;
     font-family: 'Press Start 2P', sans-serif;
     color: white;
     pointer-events: none;
@@ -39,11 +38,12 @@
 <body>
 
 <canvas id="starCanvas"></canvas>
-<div class="caption">m0x</div>
+<div class="caption" id="caption">m0x</div>
 
 <script>
   const canvas = document.getElementById('starCanvas');
   const ctx = canvas.getContext('2d');
+  const caption = document.getElementById('caption');
 
   const starLayers = [
     { speed: 5.0, color: '#ffffff', size: 3 },
@@ -61,12 +61,13 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
+  // Create stars in the top 50% of the canvas
   function createStars() {
     for (let i = 0; i < numStars; i++) {
       const layer = starLayers[Math.floor(Math.random() * starLayers.length)];
       stars.push({
         x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        y: Math.random() * (canvas.height * 0.5), // Top 50%
         speed: layer.speed,
         color: layer.color,
         size: layer.size
@@ -83,7 +84,7 @@
 
       if (star.x < -star.size) {
         star.x = canvas.width + star.size;
-        star.y = Math.random() * canvas.height;
+        star.y = Math.random() * (canvas.height * 0.5); // Top 50%
       }
 
       ctx.fillStyle = star.color;
@@ -93,7 +94,30 @@
     requestAnimationFrame(animateStars);
   }
   animateStars();
+
+  // Caption bounce animation using an inverted sine wave
+  let angle = Math.PI / 2.0;
+  const amplitude = window.innerHeight * 0.5; // Total bounce distance (top to middle)
+  const middle = window.innerHeight * 0.5;
+
+  function animateCaption() {
+    // Calculate the position using an inverted sine wave effect
+    const yOffset = middle - Math.abs(Math.sin(angle)) * amplitude;
+    caption.style.top = `${yOffset}px`;
+
+    // Increase angle for continuous animation
+    angle += 0.01;
+
+    // Reset angle when it completes a half-sine wave to create the looped bounce
+    if (angle >= Math.PI) {
+      angle = 0;
+    }
+
+    requestAnimationFrame(animateCaption);
+  }
+  animateCaption();
 </script>
 
 </body>
 </html>
+
