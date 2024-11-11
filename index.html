@@ -108,7 +108,7 @@
   function drawGrid() {
     const horizon = canvas.height * 0.5;
     const gridHeight = canvas.height * 0.5;
-    const numVerticalLines = canvas.width / 50;
+    const numVerticalLines = canvas.width / 15;
     const numHorizontalLines = canvas.height / 50;
 
     ctx.lineWidth = 1;
@@ -116,8 +116,8 @@
 
     // Draw vertical lines (scrolling effect)
     for (let i = 0; i <= numVerticalLines; i++) {
-      const x = (i - numVerticalLines / 2) * 100 + gridOffset;
-      const xStart = canvas.width / 2 + x / 2;
+      const x = (i - numVerticalLines / 2) * 150 + gridOffset;
+      const xStart = canvas.width / 2 + x / 8;
       const xEnd = canvas.width / 2 + x;
 
       ctx.beginPath();
@@ -128,7 +128,7 @@
 
     // Draw horizontal lines with perspective effect
     for (let j = 1; j <= numHorizontalLines; j++) {
-      const y = horizon + Math.pow(j / numHorizontalLines, 2) * gridHeight;
+      const y = horizon + Math.pow(j / numHorizontalLines, 3) * gridHeight;
 
       ctx.beginPath();
       ctx.moveTo(0, y);
@@ -136,8 +136,8 @@
       ctx.stroke();
     }
 
-    gridOffset -= 2;
-    if (gridOffset <= -100) {
+    gridOffset -= 8;
+    if (gridOffset <= -150) {
       gridOffset = 0;
     }
 
