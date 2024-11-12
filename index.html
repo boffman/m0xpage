@@ -28,7 +28,7 @@
     font-family: 'Press Start 2P', sans-serif;
     color: white;
     pointer-events: none;
-    background: linear-gradient(0deg, rgba(0,190,191,1) 0%, rgba(29,0,255,1) 50%, rgba(253,45,213,1) 100%);
+    background: linear-gradient(0deg, rgba(0,213,214,1) 0%, rgba(8,0,69,1) 50%, rgba(253,45,213,1) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -37,20 +37,20 @@
 </head>
 <body>
 
-<canvas id="starCanvas"></canvas>
+<canvas id="m0xCanvas"></canvas>
 <div class="caption" id="caption">m0x</div>
 
 <script>
-  const canvas = document.getElementById('starCanvas');
+  const canvas = document.getElementById('m0xCanvas');
   const ctx = canvas.getContext('2d');
   const caption = document.getElementById('caption');
 
   let starAnimationId, gridAnimationId, captionAnimationId;
-  let angle = Math.PI / 2.0; // Initial angle for caption bounce
-  let gridOffset = 0; // Initial grid offset
+  let angle = Math.PI / 2.0;
+  let gridOffset = 0;
   const starLayers = [
-    { speed: 5.0, color: '#ffffff', size: 3 },
-    { speed: 3.0, color: '#cccccc', size: 2 },
+    { speed: 3.0, color: '#ffffff', size: 3 },
+    { speed: 2.0, color: '#cccccc', size: 2 },
     { speed: 1.0, color: '#888888', size: 2 }
   ];
   const stars = [];
@@ -64,13 +64,15 @@
   function resetStars() {
     stars.length = 0;
     for (let i = 0; i < numStars; i++) {
-      const layer = starLayers[Math.floor(Math.random() * starLayers.length)];
+      const layerIx = Math.floor(Math.random() * starLayers.length);
+      const layer = starLayers[layerIx];
       stars.push({
         x: Math.random() * canvas.width,
-        y: Math.random() * (canvas.height * 0.5), // Top 50%
+        y: Math.random() * (canvas.height * 0.5),
         speed: layer.speed,
         color: layer.color,
-        size: layer.size
+        size: layer.size,
+        layerIx: layerIx
       });
     }
   }
@@ -82,7 +84,7 @@
       star.x -= star.speed;
       if (star.x < -star.size) {
         star.x = canvas.width + star.size;
-        star.y = Math.random() * (canvas.height * 0.5); // Top 50%
+        star.y = Math.random() * (canvas.height * 0.5);
       }
       ctx.fillStyle = star.color;
       ctx.fillRect(star.x, star.y, star.size, star.size);
@@ -113,17 +115,14 @@
 
     ctx.lineWidth = 1;
 
-    // Draw vertical lines with a gradient from dark to light
     for (let i = 0; i <= numVerticalLines; i++) {
       const x = (i - numVerticalLines / 2) * 150 + gridOffset;
       const xStart = canvas.width / 2 + x / 8;
       const xEnd = canvas.width / 2 + x;
 
-      // Create a gradient for each vertical line from horizon (dark) to bottom (light)
       const gradient = ctx.createLinearGradient(0, horizon, 0, horizon + gridHeight);
-      //gradient.addColorStop(0, "rgba(50, 50, 50, 0.3)"); // Darker at the top
-      gradient.addColorStop(0, "rgba(255, 255, 255, 0.1)"); // Brighter at the bottom
-      gradient.addColorStop(1, "rgba(255, 255, 255, 1.0)"); // Brighter at the bottom
+      gradient.addColorStop(0, "rgba(255, 155, 255, 0.1)");
+      gradient.addColorStop(1, "rgba(255, 155, 255, 1.0)");
 
       ctx.strokeStyle = gradient;
       ctx.beginPath();
@@ -132,13 +131,11 @@
       ctx.stroke();
     }
 
-    // Draw horizontal lines with opacity based on distance from horizon
     for (let j = 1; j <= numHorizontalLines; j++) {
       const y = horizon + Math.pow(j / numHorizontalLines, 3) * gridHeight;
 
-      // Calculate opacity based on distance from horizon
       const opacity = (j / numHorizontalLines) * 0.5;
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.strokeStyle = `rgba(255, 155, 255, ${opacity})`;
 
       ctx.beginPath();
       ctx.moveTo(0, y);
@@ -146,7 +143,7 @@
       ctx.stroke();
     }
 
-    gridOffset -= 8;
+    gridOffset -= 18;
     if (gridOffset <= -150) {
       gridOffset = 0;
     }
@@ -168,17 +165,15 @@
     cancelAnimationFrame(captionAnimationId);
   }
 
-  // Handle resize
   let resizeTimeout;
   window.addEventListener('resize', () => {
-    stopAnimations(); // Stop animations
+    stopAnimations();
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      startAnimations(); // Restart animations after resizing stops
-    }, 200); // Delay to wait until resizing is done
+      startAnimations();
+    }, 200);
   });
 
-  // Initialize
   startAnimations();
 </script>
 
