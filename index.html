@@ -24,7 +24,7 @@
     position: absolute;
     width: 100%;
     text-align: center;
-    font-size: 6rem;
+    font-size: 10rem;
     font-family: 'Press Start 2P', sans-serif;
     color: white;
     pointer-events: none;
@@ -44,8 +44,10 @@
   const canvas = document.getElementById('m0xCanvas');
   const ctx = canvas.getContext('2d');
   const caption = document.getElementById('caption');
+  let captionTurns = 0;
+  let captionAngleSpeed = 0.02;
 
-  let starAnimationId, gridAnimationId, captionAnimationId;
+  let starAnimationId, gridAnimationId, captionAnimationId, scrollerdAnimationId;
   let angle = Math.PI / 2.0;
   let gridOffset = 0;
   const starLayers = [
@@ -54,11 +56,19 @@
     { speed: 1.0, color: '#888888', size: 2 }
   ];
   const stars = [];
-  const numStars = 200;
+  let numStars = 200;
+
+  const scrollText = "................ -={ m0x r0x my s0x }=- ................                    - Bakom brödbutiken bodde Baskerbosses båda bröder, bröderna Basker.        Brödernas båda brädade beundrarinnor brukade besviket begagna brödbutikens bullar.        Bullarna bakade Baskerbosses bas, Bagarbasse.        Baskerbosse bodde bredvid brödbutikens blå byggnad.        Baskerbosses bröders brädade beundrarinnor bodde båda bortom bergen, besynnerligt billigt bredvid Biffbertils bastanta baconbod.        Byxbeklädd blott baktill…, beslöt Baskerbosse besöka Biffbertils baconbod.        Bilen brummade bort bredvid belgiska bananbolagets blå byggnad.        Bort bortom B-lagets bisarra bazarer, bort bortom brottarnas bökiga bryggor.        Betongen brusade bredvid bilen.        Behärskat bromsade Baskerbosse bakom bankbudets beigea buss.        Bankbudet betraktade Baskerbosse blygt.        Baskerbosse besvarade Bankbudets blick.        Bakom balkongbrokaden beskådade båda beundrarinnorna besöket.        Baskerbosse bar buttert bort bilen bakom Biffbertils baconbod.        Bland bilvraken bakom baconboden brukade Biffbertil bygga billiga bidéer.        Braket blev bedövande, ”Bänd bort Bentleyn, bänd bort Bentleyn”, brölade Baskerbosse besatt.        Bankbudet bajsade baken brun.        Båda beundrarinnorna bantade bort brösten.        Bagarbasse bakade bredare bullar.        Baskerbosse brottade bort bilvraken, böjde bak bidéerna, bankade Biffbertils brevlåda bucklig, bromsade bestört.        Beskedet blottades bakom brevlådan: Biffbertil bortrest.        Bankbudet blev buddhist.        Båda beundrarinnorna började betala besynnerliga bankgiroblanketter beträffande betal-TV:s bredare basutbud.        Baskerbosses beklagliga belägenhet bekymrade blott bredvidboende Becks bortskämda, bleka boxer.       ";  
+  const scrollTextLen = scrollText.length;
+  const scrollTextSize = 100;
+  const scrollTextSpeed = 10;
+  let scrollTextCharIx = 0;
+  let scrollTextXPos = NaN;
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    numStars = canvas.width / 10.0;
   }
 
   function resetStars() {
@@ -98,10 +108,25 @@
     const middle = canvas.height * 0.5;
     const yOffset = middle - Math.abs(Math.sin(angle)) * amplitude;
     caption.style.top = `${yOffset}px`;
+    const transforms = [
+      `rotate(${angle*2}rad)`,
+      `rotate(${-angle*2}rad)`,
+      `rotateX(${angle*2}rad)`,
+      `rotateY(${-angle*2}rad)`,
+      `rotate(${angle*2}rad) rotateX(${angle*2}rad)`,
+      `rotate(${-angle*2}rad) rotateY(${angle*2}rad)`,
+    ];
+    if ((captionTurns+1) % 4 == 0) {
+      caption.style.transform = transforms[(captionTurns+1) / 4 - 1];
+    }
 
-    angle += 0.01;
+    angle += captionAngleSpeed;
     if (angle >= Math.PI) {
       angle = 0;
+      captionTurns += 1;
+      if (captionTurns >= transforms.length * 4) {
+        captionTurns = 0;
+      }
     }
 
     captionAnimationId = requestAnimationFrame(animateCaption);
@@ -151,18 +176,64 @@
     gridAnimationId = requestAnimationFrame(drawGrid);
   }
 
+  function drawScoller() {    
+    ctx.font = `${scrollTextSize}px 'Press Start 2P'`;
+
+    if (isNaN(scrollTextXPos)) {
+      scrollTextXPos = canvas.width;
+    }
+    for (let i = scrollTextCharIx; i < scrollTextLen; i++) {
+      const char = scrollText[i];
+      let charNo = i - scrollTextCharIx;
+      const x = scrollTextXPos + charNo * scrollTextSize;
+      // If the character is off the screen
+      if (x <= -scrollTextSize) {
+        // Move to the next character in next frame
+        scrollTextCharIx += 1;
+        scrollTextXPos += scrollTextSize;
+        if (scrollTextCharIx >= scrollTextLen) {
+          scrollTextCharIx = 0;
+          scrollTextXPos = NaN;
+          break;
+        }
+        continue;
+      }
+      if (x > canvas.width) {
+        break;
+      }      
+      console.log(canvas.width);
+      let v = (x / canvas.width) * (0.002*canvas.width*Math.PI);
+      var yOffset = Math.sin(v) * 50 + 50;
+      var maxYOffset = Math.sin(Math.PI * 2) * 50 + 50;
+      var normYOffset = yOffset / maxYOffset;
+      var color = Math.floor(normYOffset * 65) + 10;
+      const y = canvas.height - scrollTextSize - yOffset;
+      ctx.fillStyle = `rgba(${color}, ${color}, ${color*3}, 255)`;
+      ctx.fillText(char, x, y);
+    }
+    if (!isNaN(scrollTextXPos)) {
+      scrollTextXPos -= scrollTextSpeed;
+    }
+
+    scrollerdAnimationId = requestAnimationFrame(drawScoller);
+  }
+
   function startAnimations() {
     resizeCanvas();
     resetStars();
     animateStars();
     animateCaption();
     drawGrid();
+    document.fonts.ready.then(() => {
+      drawScoller();
+    });
   }
 
   function stopAnimations() {
     cancelAnimationFrame(starAnimationId);
     cancelAnimationFrame(gridAnimationId);
     cancelAnimationFrame(captionAnimationId);
+    cancelAnimationFrame(scrollerdAnimationId);
   }
 
   let resizeTimeout;
