@@ -32,6 +32,18 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+@media (max-width: 768px) {
+  .caption {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .caption {
+    font-size: 3rem;
+  }
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
@@ -47,7 +59,7 @@
   let captionTurns = 0;
   let captionAngleSpeed = 0.02;
 
-  let starAnimationId, gridAnimationId, captionAnimationId, scrollerdAnimationId;
+  let animationId;
   let angle = Math.PI / 2.0;
   let gridOffset = 0;
   const starLayers = [
@@ -58,10 +70,11 @@
   const stars = [];
   let numStars = 200;
 
-  const scrollText = "................ -={ m0x r0x my s0x }=- ................                    - Bakom brödbutiken bodde Baskerbosses båda bröder, bröderna Basker.        Brödernas båda brädade beundrarinnor brukade besviket begagna brödbutikens bullar.        Bullarna bakade Baskerbosses bas, Bagarbasse.        Baskerbosse bodde bredvid brödbutikens blå byggnad.        Baskerbosses bröders brädade beundrarinnor bodde båda bortom bergen, besynnerligt billigt bredvid Biffbertils bastanta baconbod.        Byxbeklädd blott baktill…, beslöt Baskerbosse besöka Biffbertils baconbod.        Bilen brummade bort bredvid belgiska bananbolagets blå byggnad.        Bort bortom B-lagets bisarra bazarer, bort bortom brottarnas bökiga bryggor.        Betongen brusade bredvid bilen.        Behärskat bromsade Baskerbosse bakom bankbudets beigea buss.        Bankbudet betraktade Baskerbosse blygt.        Baskerbosse besvarade Bankbudets blick.        Bakom balkongbrokaden beskådade båda beundrarinnorna besöket.        Baskerbosse bar buttert bort bilen bakom Biffbertils baconbod.        Bland bilvraken bakom baconboden brukade Biffbertil bygga billiga bidéer.        Braket blev bedövande, ”Bänd bort Bentleyn, bänd bort Bentleyn”, brölade Baskerbosse besatt.        Bankbudet bajsade baken brun.        Båda beundrarinnorna bantade bort brösten.        Bagarbasse bakade bredare bullar.        Baskerbosse brottade bort bilvraken, böjde bak bidéerna, bankade Biffbertils brevlåda bucklig, bromsade bestört.        Beskedet blottades bakom brevlådan: Biffbertil bortrest.        Bankbudet blev buddhist.        Båda beundrarinnorna började betala besynnerliga bankgiroblanketter beträffande betal-TV:s bredare basutbud.        Baskerbosses beklagliga belägenhet bekymrade blott bredvidboende Becks bortskämda, bleka boxer.       ";  
+  const scrollText = "................ -={ m0x r0x my s0x }=- ................                    - Bakom brödbutiken bodde Baskerbosses båda bröder, bröderna Basker.        Brödernas båda brädade beundrarinnor brukade besviket begagna brödbutikens bullar.        Bullarna bakade Baskerbosses bas, Bagarbasse.        Baskerbosse bodde bredvid brödbutikens blå byggnad.        Baskerbosses bröders brädade beundrarinnor bodde båda bortom bergen, besynnerligt billigt bredvid Biffbertils bastanta baconbod.        Byxbeklädd blott baktill…, beslöt Baskerbosse besöka Biffbertils baconbod.        Bilen brummade bort bredvid belgiska bananbolagets blå byggnad.        Bort bortom B-lagets bisarra bazarer, bort bortom brottarnas bökiga bryggor.        Betongen brusade bredvid bilen.        Behärskat bromsade Baskerbosse bakom bankbudets beigea buss.        Bankbudet betraktade Baskerbosse blygt.        Baskerbosse besvarade Bankbudets blick.        Bakom balkongbrokaden beskådade båda beundrarinnorna besöket.        Baskerbosse bar buttert bort bilen bakom Biffbertils baconbod.        Bland bilvraken bakom baconboden brukade Biffbertil bygga billiga bidéer.        Braket blev bedövande, ”Bänd bort Bentleyn, bänd bort Bentleyn”, brölade Baskerbosse besatt.        Bankbudet bajsade baken brun.        Båda beundrarinnorna bantade bort brösten.        Bagarbasse bakade bredare bullar.        Baskerbosse brottade bort bilvraken, böjde bak bidéerna, bankade Biffbertils brevlåda bucklig, bromsade bestört.        Beskedet blottades bakom brevlådan: Biffbertil bortrest.        Bankbudet blev buddhist.        Båda beundrarinnorna började betala besynnerliga bankgiroblanketter beträffande betal-TV:s bredare basutbud.        Baskerbosses beklagliga belägenhet bekymrade blott bredvidboende Becks bortskämda, bleka boxer.       ";
   const scrollTextLen = scrollText.length;
-  const scrollTextSize = 100;
-  const scrollTextSpeed = 10;
+  let scrollTextSize = 100;
+  let scrollTextSpeed = 10;
+  let scrollWaveFactor = 0.002;
   let scrollTextCharIx = 0;
   let scrollTextXPos = NaN;
 
@@ -69,6 +82,19 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     numStars = canvas.width / 10.0;
+    scrollTextSize = Math.min(60, canvas.width * canvas.height * 0.0000586);
+    if (canvas.width <= 768) {
+      scrollWaveFactor = 15;
+      scrollTextSpeed = 2;
+    }
+    else if (canvas.width <= 1024) {
+      scrollWaveFactor = 15;
+      scrollTextSpeed = 4;
+    }
+    else {
+      scrollWaveFactor = canvas.width / 100.0;
+      scrollTextSpeed = 7;
+    }
   }
 
   function resetStars() {
@@ -99,8 +125,6 @@
       ctx.fillStyle = star.color;
       ctx.fillRect(star.x, star.y, star.size, star.size);
     });
-
-    starAnimationId = requestAnimationFrame(animateStars);
   }
 
   function animateCaption() {
@@ -128,8 +152,6 @@
         captionTurns = 0;
       }
     }
-
-    captionAnimationId = requestAnimationFrame(animateCaption);
   }
 
   function drawGrid() {
@@ -172,11 +194,9 @@
     if (gridOffset <= -150) {
       gridOffset = 0;
     }
-
-    gridAnimationId = requestAnimationFrame(drawGrid);
   }
 
-  function drawScoller() {    
+  function drawScoller() {
     ctx.font = `${scrollTextSize}px 'Press Start 2P'`;
 
     if (isNaN(scrollTextXPos)) {
@@ -186,9 +206,7 @@
       const char = scrollText[i];
       let charNo = i - scrollTextCharIx;
       const x = scrollTextXPos + charNo * scrollTextSize;
-      // If the character is off the screen
       if (x <= -scrollTextSize) {
-        // Move to the next character in next frame
         scrollTextCharIx += 1;
         scrollTextXPos += scrollTextSize;
         if (scrollTextCharIx >= scrollTextLen) {
@@ -200,11 +218,11 @@
       }
       if (x > canvas.width) {
         break;
-      }      
-      console.log(canvas.width);
-      let v = (x / canvas.width) * (0.002*canvas.width*Math.PI);
-      var yOffset = Math.sin(v) * 50 + 50;
-      var maxYOffset = Math.sin(Math.PI * 2) * 50 + 50;
+      }
+      let scrollMag = scrollTextSize / 2.0;
+      let v = (x / canvas.width) * scrollWaveFactor;
+      var yOffset = Math.sin(v) * scrollMag + scrollMag;
+      var maxYOffset = Math.sin(Math.PI * 2) * scrollMag + scrollMag;
       var normYOffset = yOffset / maxYOffset;
       var color = Math.floor(normYOffset * 65) + 10;
       const y = canvas.height - scrollTextSize - yOffset;
@@ -214,26 +232,26 @@
     if (!isNaN(scrollTextXPos)) {
       scrollTextXPos -= scrollTextSpeed;
     }
-
-    scrollerdAnimationId = requestAnimationFrame(drawScoller);
   }
 
-  function startAnimations() {
-    resizeCanvas();
-    resetStars();
+  function runAnimations() {
     animateStars();
     animateCaption();
     drawGrid();
     document.fonts.ready.then(() => {
       drawScoller();
     });
+    animationId = requestAnimationFrame(runAnimations);
+  }
+
+  function startAnimations() {
+    resizeCanvas();
+    resetStars();
+    runAnimations();
   }
 
   function stopAnimations() {
-    cancelAnimationFrame(starAnimationId);
-    cancelAnimationFrame(gridAnimationId);
-    cancelAnimationFrame(captionAnimationId);
-    cancelAnimationFrame(scrollerdAnimationId);
+    cancelAnimationFrame(animationId);
   }
 
   let resizeTimeout;
@@ -250,4 +268,3 @@
 
 </body>
 </html>
-
